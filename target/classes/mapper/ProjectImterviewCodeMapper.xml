@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.monetware.ringinterview.business.dao.ProjectInterviewCodeDao">
+
+    <!-- 查询分析首页列表 -->
+    <select id="getInterviewCodeList" parameterType="com.monetware.ringinterview.business.pojo.vo.stat.InterviewCodeSearchVO"
+            resultType="com.monetware.ringinterview.business.pojo.dto.stat.InterviewCodeSearchDTO">
+        SELECT
+        c.id,
+        c.name,
+        c.type,
+        c.rule,
+        COUNT(s.sample_id) sampleCount,
+        SUM(s.count) markCount
+        FROM rs_project_interview_code c
+        LEFT JOIN (
+        SELECT
+        code_id,
+        sample_id,
+        count(code_id) count
+        FROM rs_project_interview_mark
+        GROUP BY code_id,sample_id) s ON s.code_id = c.id
+        WHERE c.project_id = #{projectId}
+        <if test="name != null and name !=''">
+            and c.`name` like concat('%', #{name}, '%')
+        </if>
+        <if test="type != null">
+            and c.type = #{type}
+        </if>
+        <if test="userId != null">
+            AND c.create_user = #{userId}
+        </if>
+        GROUP BY c.rule,c.type
+        order by c.create_time desc
+    </select>
+
+    <!-- 查询分析所有本项目编码 -->
+    <select id="getAllInterviewCodeList" parameterType="com.monetware.ringinterview.business.pojo.vo.stat.InterviewCodeVO"
+            resultType="com.monetware.ringinterview.business.pojo.dto.stat.InterviewCodeSearchDTO">
+        SELECT
+        c.id,
+        c.name,
+        c.type,
+        c.rule,
+        COUNT(s.sample_id) sampleCount,
+        SUM(s.count) markCount
+        FROM rs_project_interview_code c
+        LEFT JOIN (
+        SELECT
+        code_id,
+        sample_id,
+        count(code_id) count
+        FROM rs_project_interview_mark
+        GROUP BY code_id,sample_id) s ON s.code_id = c.id
+        WHERE c.project_id = #{projectId}
+        GROUP BY c.rule,c.type
+        order by c.create_time desc
+    </select>
+
+</mapper>

@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.monetware.ringinterview.business.dao.ProjectInterviewFileDao">
+
+    <!-- 获取访谈录音(附件)列表 -->
+    <select id="getInterviewFileList"
+            resultType="com.monetware.ringinterview.business.pojo.dto.interview.ProjectInterviewFileDTO">
+       SELECT
+        pif.id,
+        pif.name,
+        ru.name userName,
+        pif.create_time,
+        pif.duration,
+        pif.file_size,
+        pif.file_path,
+        pif.upload_time
+    FROM
+        rs_project_interview_file pif
+        LEFT JOIN rs_user ru ON pif.create_user = ru.id
+    WHERE
+        pif.interview_id = #{interviewId}
+        AND pif.type = #{type}
+    </select>
+
+    <!-- App获取访谈录音(附件)列表 -->
+    <select id="getInterviewFileListApp"
+            resultType="com.monetware.ringinterview.business.pojo.dto.interview.ProjectInterviewFileDTO">
+        SELECT
+        pif.id,
+        pif.name,
+        ru.name userName,
+        pif.create_time,
+        pif.duration,
+        pif.file_size,
+        pif.file_path,
+        pif.upload_time
+        FROM
+        rs_project_interview_file pif
+        LEFT JOIN rs_user ru ON pif.create_user = ru.id
+        WHERE
+        pif.interview_id = #{interviewId}
+        AND pif.type = #{type}
+    </select>
+
+    <!-- 获取访谈录音(附件)列表 -->
+    <select id="getFileMessage"
+            resultType="com.monetware.ringinterview.business.pojo.dto.interview.ProjectInterviewFileDTO">
+    SELECT
+        pif.id,
+        pif.name,
+        ru.name userName,
+        pif.create_time,
+        pif.duration,
+        pif.file_size,
+        pif.file_path,
+        pif.upload_time
+    FROM
+        rs_project_interview_file pif
+        LEFT JOIN rs_user ru ON pif.create_user = ru.id
+    WHERE
+        pif.id = #{fileId}
+        AND pif.type = #{type}
+    </select>
+
+    <select id="getFileCount" resultType="com.monetware.ringinterview.business.pojo.dto.interview.FileCountDTO">
+        select
+        sum(case when rpif.type =1 then 1 else 0 end ) fileCount,
+        sum(case when rpif.type =2 then 1 else 0 end ) attaCount,
+        (select count(id) from rs_project_interview_paragraph where interview_id = #{interviewId} ) itwtCount
+        from  rs_project_interview_file rpif
+        where rpif.interview_id = #{interviewId}
+    </select>
+
+</mapper>

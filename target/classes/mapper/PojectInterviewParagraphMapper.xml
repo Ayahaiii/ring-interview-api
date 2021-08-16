@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.monetware.ringinterview.business.dao.ProjectInterviewParagraphDao">
+
+    <select id="getParagraphList" resultType="com.monetware.ringinterview.business.pojo.dto.interview.InterviewParagraphDTO">
+        select
+        rpip.id,
+        rpip.name,
+        rpif.name fileName,
+        ru.name createName,
+        rpis.name speakName,
+        rpis.type,
+        rpip.paragraph,
+        rpip.begin_time,
+        rpip.end_time,
+        rpip.create_time,
+        rpip.create_user,
+        rpip.duration,
+        rpi.status
+        from rs_project_interview_paragraph rpip
+        left join rs_project_interview_speaker rpis on rpip.speak_id = rpis.id
+        left join rs_project_interview rpi on rpis.interview_id = rpi.id
+        left join rs_user ru on rpip.create_user = ru.id
+        left join rs_project_interview_file rpif on rpif.id = rpip.file_id
+        where rpip.interview_id = #{interviewId}
+            <if test="fileId !=null and fileId != ''">
+                and rpip.file_id = #{fileId}
+            </if>
+            <if test="speakId !=null and speakId !=''">
+                and rpip.speak_id = #{speakId}
+            </if>
+            <if test="speakType!=null and speakType!=''">
+                and rpis.type = #{speakType}
+            </if>
+            <if test="keyword !=null and keyword !=''">
+                and (rpip.`paragraph` LIKE CONCAT('%',#{keyword},'%'))
+            </if>
+    </select>
+
+    <select id="getParagraphListApp" resultType="com.monetware.ringinterview.business.pojo.dto.interview.InterviewParagraphDTO">
+        select
+        rpip.id,
+        rpip.name,
+        rpif.name fileName,
+        ru.name createName,
+        rpis.name speakName,
+        rpis.type,
+        rpip.paragraph,
+        rpip.begin_time,
+        rpip.end_time,
+        rpip.create_time,
+        rpip.create_user,
+        rpip.duration,
+        rpi.status
+        from rs_project_interview_paragraph rpip
+        left join rs_project_interview_speaker rpis on rpip.speak_id = rpis.id
+        left join rs_project_interview rpi on rpis.interview_id = rpi.id
+        left join rs_user ru on rpip.create_user = ru.id
+        left join rs_project_interview_file rpif on rpif.id = rpip.file_id
+        where rpip.interview_id = #{interviewId}
+        <if test="fileId !=null and fileId != ''">
+            and rpip.file_id = #{fileId}
+        </if>
+        <if test="speakId !=null and speakId !=''">
+            and rpip.speak_id = #{speakId}
+        </if>
+        <if test="speakType!=null and speakType!=''">
+            and rpis.type = #{speakType}
+        </if>
+        <if test="keyword !=null and keyword !=''">
+            and (rpip.`paragraph` LIKE CONCAT('%',#{keyword},'%'))
+        </if>
+    </select>
+
+    <!-- 根据样本获取对话文本 -->
+    <select id="getParagraphsBySampleIds" resultType="java.lang.String">
+        select paragraph from rs_project_interview_paragraph p
+        left join rs_project_interview_sample s on s.interview_id = p.interview_id
+        where s.project_id = #{projectId} and s.sample_id in
+        <foreach collection="sampleIds" item="item" index="index" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </select>
+
+    <!-- 根据样本获取对话文本详情 -->
+    <select id="getParagraphsBySampleId" parameterType="com.monetware.ringinterview.business.pojo.vo.stat.AnalystParagraphVO"
+            resultType="com.monetware.ringinterview.business.pojo.dto.stat.AnalystParagraphDTO">
+        select
+        p.id,
+        sp.`name`,
+        p.interview_id interviewId,
+        p.paragraph,
+        sp.type
+        from rs_project_interview_paragraph p
+        left join rs_project_interview_sample s on s.interview_id = p.interview_id
+        LEFT JOIN rs_project_interview_speaker sp ON p.speak_id = sp.id
+        where s.project_id = #{projectId} and s.sample_id = #{sampleId}
+        <if test="speakerId != null">
+            and sp.id = #{speakerId}
+        </if>
+        <if test="speakType != null and speakType != ''">
+            and sp.type = #{speakType}
+        </if>
+        <if test="keyword !=null and keyword !=''">
+            and p.`paragraph` LIKE CONCAT('%',#{keyword},'%')
+        </if>
+    </select>
+
+    <!-- 根据项目ID获取对话文本 -->
+    <select id="getParagraphsByProjectId" resultType="com.monetware.ringinterview.business.pojo.dto.stat.AnalystParagraphAutoDTO">
+        SELECT
+        p.id,
+        p.interview_id interviewId,
+        s.sample_id sampleId,
+        p.paragraph
+        FROM rs_project_interview_paragraph p
+        LEFT JOIN rs_project_interview_sample s ON p.interview_id = s.interview_id
+        WHERE s.project_id = #{projectId}
+        <if test="userId != null">
+            AND s.sample_id in (SELECT s.id
+            FROM rs_project_sample_${projectId} s
+            LEFT JOIN rs_sample_assignment_${projectId} sa ON sa.sample_id = s.id AND sa.type = 2
+            LEFT JOIN rs_project_team_user tu ON sa.team_user_id = tu.id AND tu.project_id = #{projectId}
+            WHERE tu.user_id = #{userId})
+        </if>
+    </select>
+
+    <insert id="insertBatchParagraph">
+        insert into rs_project_interview_paragraph(name,interview_id,speak_id,file_id,paragraph,create_user,create_time)
+        values
+        <foreach collection="paragraphs" item="item" separator=",">
+            (#{item.name},#{item.interviewId},#{item.speakId},#{item.fileId},#{item.paragraph},#{item.createUser},#{item.createTime})
+        </foreach>
+    </insert>
+
+</mapper>

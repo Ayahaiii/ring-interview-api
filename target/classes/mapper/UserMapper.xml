@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.monetware.ringinterview.business.dao.UserDao">
+
+    <!-- 查询用户列表 -->
+    <select id="searchUser" parameterType="com.monetware.ringinterview.business.pojo.vo.user.UserSearchVO"
+            resultType="com.monetware.ringinterview.business.pojo.dto.user.UserSearchDTO">
+        select
+        id,
+        name,
+        telephone,
+        email
+        from rs_user
+        where name = #{keyword}
+        or telephone = #{keyword}
+        or email = #{keyword}
+
+    </select>
+
+    <!--判断讲话者是否存在-->
+    <select id="checkUser" parameterType="com.monetware.ringinterview.business.pojo.vo.team.TeamUserImportInfoVO"
+            resultType="java.lang.Integer">
+        select
+        id
+        from rs_user
+        where 1 = 1
+        <if test="userName != null and userName !=''">
+            and name = #{userName}
+        </if>
+        <if test="telephone != null and telephone !=''">
+            and telephone = #{telephone}
+        </if>
+        <if test="email != null and email !=''">
+            and email = #{email}
+        </if>
+    </select>
+
+    <select id="getUserList" resultType="com.monetware.ringinterview.business.pojo.dto.user.UserSearchDTO">
+        select
+        id,
+        name,
+        telephone,
+        email,
+        expire_time,
+        role,
+        status,last_login_time
+        from rs_user
+        where 1 = 1
+        <if test="name != '' and name != null">
+            and name = #{name}
+        </if>
+        <if test="email != '' and email != null">
+            and email = #{email}
+        </if>
+        <if test="telephone != '' and telephone != null">
+            and telephone = #{telephone}
+        </if>
+    </select>
+
+
+</mapper>

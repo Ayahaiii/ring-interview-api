@@ -1,0 +1,167 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.monetware.ringinterview.business.dao.ProjectInterviewMarkDao">
+
+    <!-- 查询分析首页列表 -->
+    <select id="getProjectStatList" parameterType="com.monetware.ringinterview.business.pojo.vo.stat.StatVO"
+            resultType="com.monetware.ringinterview.business.pojo.dto.stat.StatDTO">
+        SELECT
+        s.id,
+        s.name,
+        s.code,
+        c.code_count codeCount,
+        m.mark_count markCount,
+        m.interview_id,
+        s.`status`,
+        s.last_modify_time modifyTime
+        FROM rs_project_sample_${projectId} s
+        <if test="userId != null">
+            LEFT JOIN rs_sample_assignment_${projectId} sa ON sa.sample_id = s.id AND sa.type = 2
+            LEFT JOIN rs_project_team_user tu ON sa.team_user_id = tu.id AND tu.project_id = #{projectId}
+        </if>
+        LEFT JOIN (
+        SELECT
+        im.sample_id,
+        im.interview_id,
+        count(im.sample_id) mark_count
+        FROM rs_project_interview_mark im
+        WHERE im.project_id = #{projectId}
+        GROUP BY im.sample_id) m ON m.sample_id = s.id
+        LEFT JOIN (
+        SELECT t.sample_id,
+        COUNT(1) code_count
+        FROM (
+        SELECT DISTINCT
+        im.sample_id,
+        im.code_id
+        FROM rs_project_interview_mark im
+        WHERE im.project_id = #{projectId}) t
+        group by t.sample_id) c ON c.sample_id = s.id
+        where 1 = 1 AND s.status = 3
+        <if test="userId != null">
+           AND tu.user_id = #{userId}
+        </if>
+        <if test="keyword != null and keyword !=''">
+           and (s.`name` like concat('%', #{keyword}, '%') or s.code like concat('%', #{keyword}, '%'))
+        </if>
+    </select>
+
+    <!-- 查询分析首页列表 -->
+    <select id="getProjectStatAppList" parameterType="com.monetware.ringinterview.business.pojo.vo.stat.StatAppVO"
+            resultType="com.monetware.ringinterview.business.pojo.dto.stat.StatDTO">
+        SELECT
+        s.id,
+        s.name,
+        s.code,
+        c.code_count codeCount,
+        m.mark_count markCount,
+        m.interview_id,
+        s.`status`,
+        s.last_modify_time modifyTime
+        FROM rs_project_sample_${projectId} s
+        <if test="userId != null">
+            LEFT JOIN rs_sample_assignment_${projectId} sa ON sa.sample_id = s.id AND sa.type = 2
+            LEFT JOIN rs_project_team_user tu ON sa.team_user_id = tu.id AND tu.project_id = #{projectId}
+        </if>
+        LEFT JOIN (
+        SELECT
+        im.sample_id,
+        im.interview_id,
+        count(im.sample_id) mark_count
+        FROM rs_project_interview_mark im
+        WHERE im.project_id = #{projectId}
+        GROUP BY im.sample_id) m ON m.sample_id = s.id
+        LEFT JOIN (
+        SELECT t.sample_id,
+        COUNT(1) code_count
+        FROM (
+        SELECT DISTINCT
+        im.sample_id,
+        im.code_id
+        FROM rs_project_interview_mark im
+        WHERE im.project_id = #{projectId}) t
+        group by t.sample_id) c ON c.sample_id = s.id
+        where 1 = 1 AND s.status = 3
+        <if test="userId != null">
+            AND tu.user_id = #{userId}
+        </if>
+        <if test="keyword != null and keyword !=''">
+            and (s.`name` like concat('%', #{keyword}, '%') or s.code like concat('%', #{keyword}, '%'))
+        </if>
+    </select>
+
+    <!-- 获取编码图谱数据 -->
+    <select id="getCodeViewData" parameterType="com.monetware.ringinterview.business.pojo.vo.stat.CodeViewVO"
+            resultType="com.monetware.ringinterview.business.pojo.dto.stat.CodeViewDTO">
+        SELECT
+        s.`name` source,
+        c.id codeId,
+        c.`name` target,
+        COUNT(1) value
+        FROM rs_project_interview_mark m
+        LEFT JOIN rs_project_interview_code c ON m.code_id = c.id
+        LEFT JOIN rs_project_sample_${projectId} s ON m.sample_id = s.id
+        WHERE 1 = 1 AND m.project_id = #{projectId}
+        <if test="sampleIds != null">
+            and m.sample_id in
+            <foreach collection="sampleIds" item="item" index="index" open="(" separator="," close=")">
+                #{item}
+            </foreach>
+        </if>
+        <if test="codeIds != null">
+            and m.code_id in
+            <foreach collection="codeIds" item="item" index="index" open="(" separator="," close=")">
+                #{item}
+            </foreach>
+        </if>
+        GROUP BY s.`name`,c.id,c.`name`
+    </select>
+
+    <!-- 获取标注管理列表 -->
+    <select id="getInterviewMarkList" parameterType="com.monetware.ringinterview.business.pojo.vo.stat.InterviewMarkSearchVO"
+            resultType="com.monetware.ringinterview.business.pojo.dto.stat.InterviewMarkDTO">
+        SELECT
+        m.id,
+        c.id codeId,
+        c.`name` codeName,
+        m.note,
+        SUBSTRING(p.paragraph, m.`begin` + 1,m.len) text,
+        s.id sampleId,
+        s.`name` sampleName,
+        s.`code` sampleCode,
+        m.create_user createUser,
+        u.`name` userName,
+        m.create_time createTime
+        FROM rs_project_interview_mark m
+        LEFT JOIN rs_project_interview_code c ON m.code_id = c.id
+        LEFT JOIN rs_project_interview_paragraph p ON m.paragraph_id = p.id
+        LEFT JOIN rs_project_sample_${projectId} s ON m.sample_id = s.id
+        LEFT JOIN rs_user u ON m.create_user = u.id
+        WHERE m.project_id = #{projectId}
+        <if test="userId != null">
+            AND m.create_user = #{userId}
+        </if>
+        <if test="keyword != null and keyword !=''">
+            and c.`name` like concat('%', #{keyword}, '%')
+        </if>
+        <if test="sampleName != null and sampleName !=''">
+            and (s.`name` like concat('%', #{sampleName}, '%') or s.code like concat('%', #{sampleName}, '%'))
+        </if>
+        <if test="note != null and note !=''">
+            and m.note like concat('%', #{keyword}, '%')
+        </if>
+    </select>
+
+    <select id="getSampleCodeMarkList" resultType="com.monetware.ringinterview.business.pojo.dto.stat.SampleCodeMarkDTO">
+        select
+        rpim.*,
+        rpic.name,
+        paragraph,
+        ru.name createName
+        from rs_project_interview_mark rpim
+        left join rs_project_interview_code rpic on rpim.code_id = rpic.id
+        left join rs_project_interview_paragraph rpip on rpim.paragraph_id = rpip.id
+        left join rs_user ru on rpim.create_user = ru.id
+        where rpim.project_id = #{projectId} and rpim.sample_id = #{sampleId}
+    </select>
+</mapper>

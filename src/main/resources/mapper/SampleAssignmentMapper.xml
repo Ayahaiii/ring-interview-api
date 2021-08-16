@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.monetware.ringinterview.business.dao.SampleAssignmentDao">
+
+
+    <!-- 创建研究对象分派表 -->
+    <update id="createSampleAssignmentTable">
+        CREATE TABLE rs_sample_assignment_${projectId} (
+        `id` bigint(11) NOT NULL AUTO_INCREMENT,
+       `sample_id` int(11)  NOT NULL ,
+       `team_user_id` int (11)  NOT NULL ,
+       `type` int(11)  NOT NULL ,
+       `create_user` int (11)  NOT NULL ,
+       `create_time` datetime(0)  NOT NULL ,
+        PRIMARY KEY (`id`)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+    </update>
+
+    <!-- 查询负责人/协助者-->
+    <select id="getTeamManager" resultType="com.monetware.ringinterview.business.pojo.dto.sample.TeamManagerDTO">
+        select
+        DISTINCT ru.id id,
+        ru.name memberName,
+        sa.type
+        from rs_sample_assignment_${projectId} sa
+        left join rs_user ru on sa.team_user_id=ru.id
+    </select>
+
+    <!--分派研究对象-->
+    <insert id="insertAssign">
+        insert into rs_sample_assignment_${projectId}
+        (sample_id,team_user_id,type,create_user,create_time)
+        values
+        <foreach collection="assignmentList" item="item" index="index" separator=",">
+            (
+            #{item.sampleId}, #{item.teamUserId}, #{item.type}, #{item.createUser}, #{item.createTime}
+            )
+        </foreach>
+    </insert>
+
+    <!--协助者id-->
+    <select id="getAssistantList" resultType="integer">
+        select
+        team_user_id
+        from rs_sample_assignment_${projectId}
+        where sample_id = #{sampleId} and type = 2
+    </select>
+
+
+    <delete id="deleteAssignmentBySampleId">
+        delete
+        from rs_sample_assignment_${projectId}
+        where sample_id in
+        <foreach collection="sampleIds" item="item" index="index" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </delete>
+
+</mapper>

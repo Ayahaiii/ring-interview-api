@@ -1,0 +1,903 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.monetware.ringinterview.business.dao.ProjectSampleDao">
+
+    <!-- 创建研究对象表 -->
+    <update id="createProjectSampleTable">
+        CREATE TABLE rs_project_sample_${projectId} (
+        `id` bigint(11) NOT NULL AUTO_INCREMENT,
+        `name` varchar(100)  NULL DEFAULT NULL,
+        `code` varchar(100) NULL DEFAULT NULL,
+        `gender` varchar(100) NULL DEFAULT NULL,
+        `age` int(11) NULL DEFAULT NULL,
+        `birth` varchar(100) NULL DEFAULT NULL,
+        `marriage_status`varchar(100) NULL DEFAULT NULL,
+        `education` varchar(100) NULL DEFAULT NULL,
+        `organization` varchar(200) NULL DEFAULT NULL,
+        `profession` varchar(200) NULL DEFAULT NULL,
+        `position` varchar(200) NULL DEFAULT NULL,
+        `political_status` varchar(100) NULL DEFAULT NULL,
+        `religion` varchar(100) NULL DEFAULT NULL,
+        `nationality` varchar(10) NULL DEFAULT NULL,
+        `language` varchar(100) NULL DEFAULT NULL,
+        `place_of_birth` varchar(200) NULL DEFAULT NULL,
+        `dialects` varchar(200) NULL DEFAULT NULL,
+        `description`varchar(200) NULL DEFAULT NULL,
+        `detail` text NULL DEFAULT NULL,
+        `email` varchar(100) NULL DEFAULT NULL,
+        `mobile` varchar(20) NULL DEFAULT NULL,
+        `phone` varchar(20) NULL DEFAULT NULL,
+        `weixin` varchar(100) NULL DEFAULT NULL,
+        `qq` varchar(20) NULL DEFAULT NULL,
+        `weibo` varchar(100) NULL DEFAULT NULL,
+        `province` varchar(20) NULL DEFAULT NULL,
+        `city` varchar(20) NULL DEFAULT NULL,
+        `district` varchar(20) NULL DEFAULT NULL,
+        `town` varchar(20) NULL DEFAULT NULL,
+        `address` varchar(200) NULL DEFAULT NULL,
+        `custom1` text NULL DEFAULT NULL,
+        `custom2` text NULL DEFAULT NULL,
+        `custom3` text NULL DEFAULT NULL,
+        `custom4` text NULL DEFAULT NULL,
+        `custom5` text NULL DEFAULT NULL,
+        `custom6` text NULL DEFAULT NULL,
+        `custom7` text NULL DEFAULT NULL,
+        `custom8` text NULL DEFAULT NULL,
+        `custom9` text NULL DEFAULT NULL,
+        `custom10` text NULL DEFAULT NULL,
+        `custom11` text NULL DEFAULT NULL,
+        `custom12` text NULL DEFAULT NULL,
+        `custom13` text NULL DEFAULT NULL,
+        `custom14` text NULL DEFAULT NULL,
+        `custom15` text NULL DEFAULT NULL,
+        `status` int(11) NULL DEFAULT NULL,
+        `last_modify_time` datetime(0) NULL DEFAULT NULL,
+        `last_modify_user` int(20) NULL DEFAULT NULL,
+        `create_time` datetime(0) NULL DEFAULT NULL,
+        `create_user` int(20) NULL DEFAULT NULL,
+        `is_delete` int(1) NULL DEFAULT NULL,
+        `delete_user` int(20) NULL DEFAULT NULL,
+        PRIMARY KEY (`id`)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+    </update>
+
+    <!--保存研究对象-->
+    <insert id="saveProjectSample" parameterType="com.monetware.ringinterview.business.pojo.vo.sample.ProjectSampleVO"
+            useGeneratedKeys="true" keyProperty="id">
+        insert into rs_project_sample_${projectId} (
+        name,
+        code,
+        gender,
+        age,
+        birth,
+        marriage_status,
+        education,
+        organization,
+        profession,
+        position,
+        political_status,
+        religion,
+        nationality,
+        language,
+        place_of_birth,
+        dialects,
+        description,
+        detail,
+        email,
+        mobile,
+        phone,
+        weixin,
+        qq,
+        weibo,
+        province,
+        city,
+        district,
+        town,
+        address,
+        custom1,
+        custom2,
+        custom3,
+        custom4,
+        custom5,
+        custom6,
+        custom7,
+        custom8,
+        custom9,
+        custom10,
+        custom11,
+        custom12,
+        custom13,
+        custom14,
+        custom15,
+        status,
+        last_modify_time,
+        last_modify_user,
+        create_time,
+        create_user,
+        is_delete,
+        delete_user
+        )
+        values (
+        #{name},
+        #{code},
+        #{gender},
+        #{age},
+        #{birth},
+        #{marriageStatus},
+        #{education},
+        #{organization},
+        #{profession},
+        #{position},
+        #{politicalStatus},
+        #{religion},
+        #{nationality},
+        #{language},
+        #{placeOfBirth},
+        #{dialects},
+        #{description},
+        #{detail},
+        #{email},
+        #{mobile},
+        #{phone},
+        #{weixin},
+        #{qq},
+        #{weibo},
+        #{province},
+        #{city},
+        #{district},
+        #{town},
+        #{address},
+        #{custom1},
+        #{custom2},
+        #{custom3},
+        #{custom4},
+        #{custom5},
+        #{custom6},
+        #{custom7},
+        #{custom8},
+        #{custom9},
+        #{custom10},
+        #{custom11},
+        #{custom12},
+        #{custom13},
+        #{custom14},
+        #{custom15},
+        #{status},
+        #{lastModifyTime},
+        #{lastModifyUser},
+        #{createTime},
+        #{createUser},
+        #{isDelete},
+        #{deleteUser}
+        )
+
+    </insert>
+
+    <!-- 批量添加结果 -->
+    <insert id="insertSampleList" useGeneratedKeys="true" keyProperty="id">
+        insert into rs_project_sample_${projectId}
+        (name,code,gender,age,birth,marriage_status,education,organization,profession,position,political_status,
+        religion,nationality,language,place_of_birth,dialects,description,detail,email,mobile,phone,weixin,qq,
+        weibo,province,city,district,town,address,custom1,custom2,custom3,custom4,custom5,
+        custom6,custom7,custom8,custom9,custom10,custom11,custom12,custom13,custom14,custom15,status,last_modify_time,
+        last_modify_user,create_time,create_user,is_delete,delete_user)
+        values
+        <foreach collection="list" item="item" index="index" separator=",">
+            (
+            #{item.name},
+            #{item.code},
+            #{item.gender},
+            #{item.age},
+            #{item.birth},
+            #{item.marriageStatus},
+            #{item.education},
+            #{item.organization},
+            #{item.profession},
+            #{item.position},
+            #{item.politicalStatus},
+            #{item.religion},
+            #{item.nationality},
+            #{item.language},
+            #{item.placeOfBirth},
+            #{item.dialects},
+            #{item.description},
+            #{item.detail},
+            #{item.email},
+            #{item.mobile},
+            #{item.phone},
+            #{item.weixin},
+            #{item.qq},
+            #{item.weibo},
+            #{item.province},
+            #{item.city},
+            #{item.district},
+            #{item.town},
+            #{item.address},
+            #{item.custom1},
+            #{item.custom2},
+            #{item.custom3},
+            #{item.custom4},
+            #{item.custom5},
+            #{item.custom6},
+            #{item.custom7},
+            #{item.custom8},
+            #{item.custom9},
+            #{item.custom10},
+            #{item.custom11},
+            #{item.custom12},
+            #{item.custom13},
+            #{item.custom14},
+            #{item.custom15},
+            #{item.status},
+            #{item.lastModifyTime},
+            #{item.lastModifyUser},
+            #{item.createTime},
+            #{item.createUser},
+            #{item.isDelete},
+            #{item.deleteUser}
+            )
+        </foreach>
+    </insert>
+
+    <!--修改研究对象-->
+    <update id="updateProjectSample"
+            parameterType="com.monetware.ringinterview.business.pojo.vo.sample.ProjectSampleVO">
+        update rs_project_sample_${projectId}
+        set
+        <if test="name != null and name != ''">
+            name =#{name},
+        </if>
+        <if test="code != null and code != ''">
+            code =#{code},
+        </if>
+        <if test="gender != null">
+            gender =#{gender},
+        </if>
+        <if test="age != null">
+            age =#{age},
+        </if>
+        <if test="birth != null and birth != ''">
+            birth =#{birth},
+        </if>
+        <if test="marriageStatus != null and marriageStatus != ''">
+            marriage_status =#{marriageStatus},
+        </if>
+        <if test="education != null and education != ''">
+            education =#{education},
+        </if>
+        <if test="organization != null and organization != ''">
+            organization =#{organization},
+        </if>
+        <if test="profession != null and profession != ''">
+            profession =#{profession},
+        </if>
+        <if test="position != null and position != ''">
+            position =#{position},
+        </if>
+        <if test="politicalStatus != null and politicalStatus != ''">
+            political_status =#{politicalStatus},
+        </if>
+        <if test="religion != null and religion != ''">
+            religion =#{religion},
+        </if>
+        <if test="nationality != null and nationality != ''">
+            nationality =#{nationality},
+        </if>
+        <if test="language != null and language != ''">
+            language =#{language},
+        </if>
+        <if test="placeOfBirth != null and placeOfBirth != ''">
+            place_of_birth =#{placeOfBirth},
+        </if>
+        <if test="dialects != null and dialects != ''">
+            dialects =#{dialects},
+        </if>
+        <if test="description != null and description != ''">
+            description =#{description},
+        </if>
+        <if test="detail != null and detail != ''">
+            detail =#{detail},
+        </if>
+        <if test="email != null and email != ''">
+            email =#{email},
+        </if>
+        <if test="mobile != null and mobile != ''">
+            mobile =#{mobile},
+        </if>
+        <if test="phone != null and phone != ''">
+            phone =#{phone},
+        </if>
+        <if test="weixin != null and weixin != ''">
+            phone =#{weixin},
+        </if>
+        <if test="qq != null and qq != ''">
+            qq =#{qq},
+        </if>
+        <if test="weibo != null and weibo != ''">
+            weibo =#{weibo},
+        </if>
+        <if test="province != null and province != ''">
+            province =#{province},
+        </if>
+        <if test="city != null and city != ''">
+            city =#{city},
+        </if>
+        <if test="district != null and district != ''">
+            district =#{district},
+        </if>
+        <if test="town != null and town != ''">
+            town =#{town},
+        </if>
+        <if test="address != null and address != ''">
+            address =#{address},
+        </if>
+        <if test="custom1 != null and custom1 != ''">
+            custom1 =#{custom1},
+        </if>
+        <if test="custom2 != null and custom2 != ''">
+            custom2 =#{custom2},
+        </if>
+        <if test="custom3 != null and custom3 != ''">
+            custom3 =#{custom3},
+        </if>
+        <if test="custom4 != null and custom4 != ''">
+            custom4 =#{custom4},
+        </if>
+        <if test="custom5 != null and custom5 != ''">
+            custom5 =#{custom5},
+        </if>
+        <if test="custom6 != null and custom6 != ''">
+            custom6 =#{custom6},
+        </if>
+        <if test="custom7 != null and custom7 != ''">
+            custom7 =#{custom7},
+        </if>
+        <if test="custom8 != null and custom8 != ''">
+            custom8 =#{custom8},
+        </if>
+        <if test="custom9 != null and custom9 != ''">
+            custom9 =#{custom9},
+        </if>
+        <if test="custom10 != null and custom10 != ''">
+            custom10 =#{custom10},
+        </if>
+        <if test="custom11 != null and custom11 != ''">
+            custom11 =#{custom11},
+        </if>
+        <if test="custom12 != null and custom12 != ''">
+            custom12 =#{custom12},
+        </if>
+        <if test="custom13 != null and custom13 != ''">
+            custom13 =#{custom13},
+        </if>
+        <if test="custom14 != null and custom14 != ''">
+            custom14 =#{custom14},
+        </if>
+        <if test="custom15 != null and custom15 != ''">
+            custom15 =#{custom15},
+        </if>
+        <if test="status != null">
+            status =#{status},
+        </if>
+        <if test="lastModifyTime != null">
+            last_modify_time =#{lastModifyTime},
+        </if>
+        <if test="lastModifyUser != null">
+            last_modify_user =#{lastModifyUser},
+        </if>
+        <if test="createTime != null">
+            create_time =#{createTime},
+        </if>
+        <if test="createUser != null">
+            create_user =#{createUser},
+        </if>
+        <if test="isDelete != null">
+            is_delete =#{isDelete},
+        </if>
+        <if test="deleteUser != null">
+            delete_user =#{deleteUser},
+        </if>
+        id = #{id}
+        where id =#{id}
+    </update>
+
+    <update id="updateSampleList">
+        <foreach collection="list" item="item" index="index" separator=";">
+            update rs_project_sample_${projectId}
+            set
+            <if test="item.name != null and item.name != ''">
+                name =#{item.name},
+            </if>
+            <if test="item.code != null and item.code != ''">
+                code =#{item.code},
+            </if>
+            <if test="item.gender != null">
+                gender =#{item.gender},
+            </if>
+            <if test="item.age != null">
+                age =#{item.age},
+            </if>
+            <if test="item.birth != null and item.birth != ''">
+                birth =#{item.birth},
+            </if>
+            <if test="item.marriageStatus != null and item.marriageStatus != ''">
+                marriage_status =#{item.marriageStatus},
+            </if>
+            <if test="item.education != null and item.education != ''">
+                education =#{item.education},
+            </if>
+            <if test="item.organization != null and item.organization != ''">
+                organization =#{item.organization},
+            </if>
+            <if test="item.profession != null and item.profession != ''">
+                profession =#{item.profession},
+            </if>
+            <if test="item.position != null and item.position != ''">
+                position =#{item.position},
+            </if>
+            <if test="item.politicalStatus != null and item.politicalStatus != ''">
+                political_status =#{item.politicalStatus},
+            </if>
+            <if test="item.religion != null and item.religion != ''">
+                religion =#{item.religion},
+            </if>
+            <if test="item.nationality != null and item.nationality != ''">
+                nationality =#{item.nationality},
+            </if>
+            <if test="item.language != null and item.language != ''">
+                language =#{item.language},
+            </if>
+            <if test="item.placeOfBirth != null and item.placeOfBirth != ''">
+                place_of_birth =#{item.placeOfBirth},
+            </if>
+            <if test="item.dialects != null and item.dialects != ''">
+                dialects =#{item.dialects},
+            </if>
+            <if test="item.description != null and item.description != ''">
+                description =#{item.description},
+            </if>
+            <if test="item.detail != null and item.detail != ''">
+                detail =#{item.detail},
+            </if>
+            <if test="item.email != null and item.email != ''">
+                email =#{item.email},
+            </if>
+            <if test="item.mobile != null and item.mobile != ''">
+                mobile =#{item.mobile},
+            </if>
+            <if test="item.phone != null and item.phone != ''">
+                phone =#{item.phone},
+            </if>
+            <if test="item.weixin != null and item.weixin != ''">
+                phone =#{item.weixin},
+            </if>
+            <if test="item.qq != null and item.qq != ''">
+                qq =#{item.qq},
+            </if>
+            <if test="item.weibo != null and item.weibo != ''">
+                weibo =#{item.weibo},
+            </if>
+            <if test="item.province != null and item.province != ''">
+                province =#{item.province},
+            </if>
+            <if test="item.city != null and item.city != ''">
+                city =#{item.city},
+            </if>
+            <if test="item.district != null and item.district != ''">
+                district =#{item.district},
+            </if>
+            <if test="item.town != null and item.town != ''">
+                town =#{item.town},
+            </if>
+            <if test="item.address != null and item.address != ''">
+                address =#{item.address},
+            </if>
+            <if test="item.custom1 != null and item.custom1 != ''">
+                custom1 =#{item.custom1},
+            </if>
+            <if test="item.custom2 != null and item.custom2 != ''">
+                custom2 =#{item.custom2},
+            </if>
+            <if test="item.custom3 != null and item.custom3 != ''">
+                custom3 =#{item.custom3},
+            </if>
+            <if test="item.custom4 != null and item.custom4 != ''">
+                custom4 =#{item.custom4},
+            </if>
+            <if test="item.custom5 != null and item.custom5 != ''">
+                custom5 =#{item.custom5},
+            </if>
+            <if test="item.custom6 != null and item.custom6 != ''">
+                custom6 =#{item.custom6},
+            </if>
+            <if test="item.custom7 != null and item.custom7 != ''">
+                custom7 =#{item.custom7},
+            </if>
+            <if test="item.custom8 != null and item.custom8 != ''">
+                custom8 =#{item.custom8},
+            </if>
+            <if test="item.custom9 != null and item.custom9 != ''">
+                custom9 =#{item.custom9},
+            </if>
+            <if test="item.custom10 != null and item.custom10 != ''">
+                custom10 =#{item.custom10},
+            </if>
+            <if test="item.custom11 != null and item.custom11 != ''">
+                custom11 =#{item.custom11},
+            </if>
+            <if test="item.custom12 != null and item.custom12 != ''">
+                custom12 =#{item.custom12},
+            </if>
+            <if test="item.custom13 != null and item.custom13 != ''">
+                custom13 =#{item.custom13},
+            </if>
+            <if test="item.custom14 != null and item.custom14 != ''">
+                custom14 =#{item.custom14},
+            </if>
+            <if test="item.custom15 != null and item.custom15 != ''">
+                custom15 =#{item.custom15},
+            </if>
+            <if test="item.status != null">
+                status =#{item.status},
+            </if>
+            <if test="item.lastModifyTime != null">
+                last_modify_time =#{item.lastModifyTime},
+            </if>
+            <if test="item.lastModifyUser != null">
+                last_modify_user =#{item.lastModifyUser},
+            </if>
+            <if test="item.createTime != null">
+                create_time =#{item.createTime},
+            </if>
+            <if test="item.createUser != null">
+                create_user =#{item.createUser},
+            </if>
+            <if test="item.isDelete != null">
+                is_delete =#{item.isDelete},
+            </if>
+            <if test="item.deleteUser != null">
+                delete_user =#{item.deleteUser},
+            </if>
+            id = #{item.id}
+            where id =#{item.id}
+        </foreach>
+    </update>
+
+    <!-- 查询研究对象列表-->
+    <select id="getSampleList" parameterType="com.monetware.ringinterview.business.pojo.vo.sample.SampleListVO"
+            resultType="com.monetware.ringinterview.business.pojo.dto.sample.SampleListDTO">
+        SELECT
+        s.*,
+        ru.name managerName,
+        ru.id managerId
+        FROM rs_project_sample_${projectId} s
+        LEFT JOIN rs_sample_assignment_${projectId} sa ON s.id = sa.sample_id and sa.type = 1
+        LEFT JOIN rs_project_team_user tu ON sa.team_user_id = tu.id AND tu.project_id = #{projectId}
+        LEFT JOIN rs_user ru ON tu.user_id = ru.id
+        where 1 = 1
+        <if test="status != null">
+            and s.status = #{status}
+        </if>
+        <if test="sampleCondition != null and sampleCondition != ''">
+            AND ${sampleCondition}
+        </if>
+        <if test="managerName != null and managerName != ''">
+            and ru.name = #{managerName}
+        </if>
+        <if test="keyword != null and keyword != ''">
+            and (s.`name` LIKE CONCAT('%',#{keyword},'%') or
+            s.`code` LIKE CONCAT('%',#{keyword},'%') or
+            s.`address` LIKE CONCAT('%',#{keyword},'%') or
+            s.`email` LIKE CONCAT('%',#{keyword},'%') or
+            s.`phone` LIKE CONCAT('%',#{keyword},'%'))
+        </if>
+        <if test="checkRole != null and checkRole == 4">
+            AND (tu.user_id IN (
+            SELECT
+            g.user_id
+            FROM rs_project_team_user_to_group g
+            LEFT JOIN rs_project_team_user_to_group g1 ON g1.group_id = g.group_id
+            WHERE g1.project_id = #{projectId} AND g1.user_id = #{userId}) OR tu.user_id = #{userId})
+        </if>
+        <if test="checkRole != null and  checkRole == 5">
+            and tu.user_id = #{userId}
+        </if>
+        <if test="checkRole != null and  checkRole == 3">
+            and s.id in ( SELECT s.id
+            FROM rs_project_sample_${projectId} s
+            LEFT JOIN rs_sample_assignment_${projectId} sa ON s.id = sa.sample_id
+            and sa.type = 2
+            LEFT JOIN rs_project_team_user tu ON sa.team_user_id = tu.id
+            AND tu.project_id = #{projectId}
+            LEFT JOIN rs_user ru ON tu.user_id = ru.id where tu.user_id = #{userId})
+        </if>
+    </select>
+
+    <!-- 查询研究对象列表-->
+    <select id="getSampleListByIds" resultType="com.monetware.ringinterview.business.pojo.dto.sample.SampleListDTO">
+        SELECT
+        ps.*,
+        ru.name managerName
+        FROM rs_project_sample_${projectId} ps
+        LEFT JOIN rs_sample_assignment_${projectId} sa ON ps.id = sa.sample_id and type = 1
+        LEFT JOIN rs_project_team_user tu ON sa.team_user_id = tu.id AND tu.project_id = #{projectId}
+        LEFT JOIN rs_user ru ON tu.user_id = ru.id
+        where 1 = 1 and ps.id in
+        <foreach collection="list" item="item" index="index" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </select>
+
+    <!-- App查询研究对象列表-->
+    <select id="getSampleListApp" parameterType="com.monetware.ringinterview.business.pojo.vo.sample.SampleListAppVO"
+            resultType="com.monetware.ringinterview.business.pojo.dto.sample.SampleListDTO">
+        SELECT
+        s.*,
+        ru.name managerName,
+        ru.id managerId
+        FROM rs_project_sample_${projectId} s
+        LEFT JOIN rs_sample_assignment_${projectId} sa ON s.id = sa.sample_id and sa.type = 1
+        LEFT JOIN rs_project_team_user tu ON sa.team_user_id = tu.id AND tu.project_id = #{projectId}
+        LEFT JOIN rs_user ru ON tu.user_id = ru.id
+        where 1 = 1 AND ru.id = #{userId}
+        <if test="status != null">
+            and s.status = #{status}
+        </if>
+        <if test="sampleCondition != null and sampleCondition != ''">
+            AND ${sampleCondition}
+        </if>
+        <if test="managerName != null and managerName != ''">
+            and ru.name = #{managerName}
+        </if>
+        <if test="keyword != null and keyword != ''">
+            and (s.`name` LIKE CONCAT('%',#{keyword},'%') or
+            s.`code` LIKE CONCAT('%',#{keyword},'%') or
+            s.`address` LIKE CONCAT('%',#{keyword},'%') or
+            s.`email` LIKE CONCAT('%',#{keyword},'%') or
+            s.`phone` LIKE CONCAT('%',#{keyword},'%'))
+        </if>
+        <if test="checkRole != null and checkRole == 4">
+            AND (tu.user_id IN (
+            SELECT
+            g.user_id
+            FROM rs_project_team_user_to_group g
+            LEFT JOIN rs_project_team_user_to_group g1 ON g1.group_id = g.group_id
+            WHERE g1.project_id = #{projectId} AND g1.user_id = #{userId}) OR tu.user_id = #{userId})
+        </if>
+        <if test="checkRole != null and  checkRole == 5">
+            and tu.user_id = #{userId}
+        </if>
+        <if test="checkRole != null and  checkRole == 3">
+            and s.id in ( SELECT s.id
+            FROM rs_project_sample_${projectId} s
+            LEFT JOIN rs_sample_assignment_${projectId} sa ON s.id = sa.sample_id
+            and sa.type = 2
+            LEFT JOIN rs_project_team_user tu ON sa.team_user_id = tu.id
+            AND tu.project_id = #{projectId}
+            LEFT JOIN rs_user ru ON tu.user_id = ru.id where tu.user_id = #{userId})
+        </if>
+    </select>
+
+    <!--删除研究对象-->
+    <delete id="deleteSample" parameterType="com.monetware.ringinterview.business.pojo.vo.sample.DeleteSampleVO">
+        delete from rs_project_sample_${projectId} where id in
+        <foreach collection="sampleIds" item="item" index="index" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </delete>
+
+    <!--研究对象详情-->
+    <select id="getSampleDetail" resultType="com.monetware.ringinterview.business.pojo.dto.sample.ProjectSampleDTO">
+        select
+        name,
+        code,
+        gender,
+        age,
+        birth,
+        marriage_status,
+        education,
+        organization,
+        profession,
+        position,
+        political_status,
+        religion,
+        nationality,
+        language,
+        place_of_birth,
+        dialects,
+        description,
+        detail,
+        email,
+        mobile,
+        phone,
+        weixin,
+        qq,
+        weibo,
+        province,
+        city,
+        district,
+        town,
+        address,
+        custom1,
+        custom2,
+        custom3,
+        custom4,
+        custom5,
+        custom6,
+        custom7,
+        custom8,
+        custom9,
+        custom10,
+        custom11,
+        custom12,
+        custom13,
+        custom14,
+        custom15,
+        status,
+        last_modify_time,
+        last_modify_user,
+        create_time,
+        create_user,
+        is_delete,
+        delete_user
+        from rs_project_sample_${projectId}
+        where id = #{id}
+    </select>
+
+    <!--更新样本状态-->
+    <update id="updateSampleStatus">
+        update rs_project_sample_${projectId}
+        set status = #{status}
+        where id in
+        <foreach collection="sampleIds" item="item" index="index" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </update>
+
+    <!--查询协助者-->
+    <select id="getAssistant" resultType="com.monetware.ringinterview.business.pojo.dto.sample.ManagerDTO">
+        select
+        ru.id,
+        ru.name,
+        ru.gender
+        FROM rs_project_sample_#{projectId} ps
+        LEFT JOIN rs_sample_assignment_#{projectId} sa ON ps.id = sa.sample_id
+        LEFT JOIN rs_project_team_user ptu on ptu.id = sa.team_user_id
+        LEFT JOIN rs_user ru ON ptu.user_id = ru.id
+        where type = 2 and ps.id = #{sampleId}
+    </select>
+
+    <!--查询样本-->
+    <select id="getSample" resultType="com.monetware.ringinterview.business.pojo.dto.sample.ManagerDTO">
+        select
+        ps.id,
+        ps.name,
+        ps.code,
+        GROUP_CONCAT(ru.id) assistantId
+        from rs_project_sample_${projectId} ps
+        left join  rs_project_interview_sample rpis ON ps.id = rpis.sample_id
+		left join rs_sample_assignment_${projectId} rsa on rpis.sample_id = rsa.sample_id and rsa.type = 2
+		left join rs_project_team_user rptu on rsa.team_user_id = rptu.id
+		left join rs_user ru on ru.id = rptu.user_id
+		where rpis.interview_id = #{interviewId}
+		group by ps.id
+    </select>
+
+    <!-- 检查code是否重复 -->
+    <select id="checkSampleExistByCode" resultType="java.lang.Integer">
+        select count(1) from rs_project_sample_${projectId}
+        where 1 = 1 and code = #{code}
+        <if test="sampleId !=null and sampleId !=''">
+            and id != #{sampleId}
+        </if>
+    </select>
+
+    <!--根据code得到样本-->
+    <select id="getSampleByCode" resultType="com.monetware.ringinterview.business.pojo.po.BaseProjectSample">
+        select * from rs_project_sample_${projectId}
+        where 1 = 1 and code = #{code}
+    </select>
+
+    <select id="getStatusById" resultType="integer">
+        select
+        status
+        from
+        rs_project_sample_${projectId}
+        where 1 = 1 and id = #{id}
+    </select>
+
+    <!-- 获取甘特图数据 -->
+    <select id="getGanteData" parameterType="com.monetware.ringinterview.business.pojo.vo.monitor.GanteDataVO"
+            resultType="com.monetware.ringinterview.business.pojo.dto.monitor.GanteDataDTO">
+        SELECT
+        ps.id,
+        ps.`code`,
+        ps.`name` name,
+        ru.`name` managerName,
+        ps.`status`,
+        DATE_FORMAT(ps.create_time,'%Y-%m-%d') startDate,
+        DATE_FORMAT(sa.create_time,'%Y-%m-%d') realStartDate,
+        DATE_FORMAT(pi.create_time,'%Y-%m-%d') ingStartDate,
+        DATE_FORMAT(pi.audit_time,'%Y-%m-%d') doneStartDate
+        FROM rs_project_sample_${projectId} ps
+        LEFT JOIN rs_sample_assignment_${projectId} sa ON sa.sample_id = ps.id AND sa.type = 1
+        LEFT JOIN rs_project_team_user tu ON tu.id = sa.team_user_id
+        LEFT JOIN rs_user ru ON ru.id = tu.user_id
+        LEFT JOIN rs_project_interview_sample pis ON pis.sample_id = ps.id AND pis.project_id = #{projectId}
+        LEFT JOIN rs_project_interview pi ON pi.id = pis.interview_id
+        WHERE 1 = 1
+        <if test="keyword != null and keyword !=''">
+            and (ps.`name` LIKE CONCAT('%',#{keyword},'%') or
+            ps.`code` LIKE CONCAT('%',#{keyword},'%') or ru.`name` LIKE CONCAT('%',#{keyword},'%'))
+        </if>
+    </select>
+
+    <!-- 获取指标体系数据 -->
+    <select id="getSampleStatData" resultType="Map">
+        SELECT
+        COUNT(1) totalCount,
+        SUM(CASE WHEN `status` > 0  THEN 1 ELSE 0 END) useCount,
+        SUM(CASE WHEN is_delete = 0  THEN 1 ELSE 0 END) validCount,
+        SUM(CASE WHEN `status` = 3  THEN 1 ELSE 0 END) successCount,
+        SUM(CASE WHEN `status` = 4  THEN 1 ELSE 0 END) failCount
+        FROM rs_project_sample_${projectId};
+    </select>
+
+    <select id="getSampleAssigned" resultMap="sampleAssigned"
+            parameterType="com.monetware.ringinterview.business.pojo.vo.sample.SampleAssignedVO">
+        SELECT
+        ps.id sampleId,
+        ps.name sampleName,
+        ps.gender sampleGender,
+        ps.code,
+        ru.id managerId,
+        ru.name managerName,
+        ru.gender managerGender,
+        ${projectId} as projectId
+        FROM rs_project_sample_${projectId} ps
+        LEFT JOIN rs_sample_assignment_${projectId} sa ON ps.id = sa.sample_id and type = 1
+        LEFT JOIN rs_project_team_user tu ON sa.team_user_id = tu.id AND tu.project_id = #{projectId}
+        LEFT JOIN rs_user ru ON tu.user_id = ru.id
+        where 1 = 1 and ps.status = 1
+        <if test="managerId !=null and managerId != ''">
+            and ru.id = #{managerId}
+        </if>
+        <if test="sampleIds != null and sampleIds.size() >0 ">
+            and ps.id in
+            <foreach collection="sampleIds" item="sampleId" open="(" close=")" separator=",">
+                #{sampleId}
+            </foreach>
+        </if>
+        <if test="keyword !=null and keyword !=''">
+            and (ps.`name` LIKE CONCAT('%',#{keyword},'%') or
+            ps.`code` LIKE CONCAT('%',#{keyword},'%'))
+        </if>
+    </select>
+
+    <resultMap id="sampleAssigned" type="com.monetware.ringinterview.business.pojo.dto.interview.SampleAssignedDTO">
+        <association property="sample" javaType="com.monetware.ringinterview.business.pojo.dto.sample.ManagerDTO">
+            <id property="id" column="sampleId"/>
+            <result property="name" column="sampleName"/>
+            <result property="gender" column="sampleGender"/>
+            <result property="code" column="code"/>
+        </association>
+        <association property="manager" javaType="com.monetware.ringinterview.business.pojo.dto.sample.ManagerDTO">
+            <id property="id" column="managerId"/>
+            <result property="name" column="managerName"/>
+            <result property="gender" column="managerGender"/>
+        </association>
+        <collection property="assistant" ofType="com.monetware.ringinterview.business.pojo.dto.sample.ManagerDTO"
+                    select="getAssistant"
+                    column="{sampleId=sampleId,projectId=projectId}"></collection>
+    </resultMap>
+
+    <!--获取初始化样本id-->
+    <select id="getSampleIdsAssigned" resultType="integer">
+        SELECT
+        id
+        FROM rs_project_sample_${projectId}
+        WHERE status = 0
+
+    </select>
+
+</mapper>

@@ -1,0 +1,260 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.monetware.ringinterview.business.dao.ProjectInterviewDao">
+
+
+    <resultMap id="detailMap" type="com.monetware.ringinterview.business.pojo.dto.interview.InterviewDetailDTO">
+        <id column="id" property="id"/>
+        <result column="interviewName" property="interviewName"/>
+        <result column="status" property="status"/>
+        <result column="plan_text" property="planText"/>
+        <result column="description" property="description"/>
+        <result column="address" property="address"/>
+        <result column="plan_duration" property="planDuration"/>
+        <result column="create_time" property="createTime"/>
+        <result column="plan_start_time" property="planStartTime"/>
+        <result column="plan_end_time" property="planEndTime"/>
+        <result column="begin_time" property="beginTime"/>
+        <result column="end_time" property="endTime"/>
+        <result column="doc_begin_time" property="docBeginTime"/>
+        <result column="doc_end_time" property="docEndTime"/>
+        <result column="audit_time" property="auditTime"/>
+        <result column="audit_end_time" property="auditEndTime"/>
+        <result column="audit_note" property="auditNote"/>
+        <association property="manager" javaType="com.monetware.ringinterview.business.pojo.dto.sample.ManagerDTO">
+            <result property="id" column="managerId"/>
+            <result property="name" column="managerName"/>
+        </association>
+        <collection property="assistantList" ofType="com.monetware.ringinterview.business.pojo.dto.sample.ManagerDTO"
+                    select="com.monetware.ringinterview.business.dao.ProjectInterviewDao.getInterviewAssistant"
+                    column="{sampleId=sampleId,projectId=projectId,interviewId=interviewId}"></collection>
+
+        <collection property="sampleList" ofType="com.monetware.ringinterview.business.pojo.dto.sample.ManagerDTO"
+                    select="com.monetware.ringinterview.business.dao.ProjectSampleDao.getSample"
+                    column="{interviewId=interviewId,projectId=projectId}"></collection>
+    </resultMap>
+
+    <select id="getInterviewAssistant" resultType="com.monetware.ringinterview.business.pojo.dto.sample.ManagerDTO">
+        SELECT
+	    DISTINCT ru.id,
+	    ru.name
+        FROM
+	    rs_project_sample_${projectId} ps
+        LEFT JOIN rs_project_interview_sample rpis on ps.id = rpis.sample_id
+        LEFT JOIN rs_sample_assignment_${projectId} sa ON rpis.sample_id = sa.sample_id
+        LEFT JOIN rs_project_team_user ptu ON ptu.id = sa.team_user_id
+        LEFT JOIN rs_user ru ON ptu.user_id = ru.id
+        WHERE
+	    sa.type = 2
+        and rpis.project_id = #{projectId} and rpis.interview_id = #{interviewId};
+    </select>
+
+    <!-- 获取访谈列表(优化) -->
+    <select id="getInterviewList" resultType="com.monetware.ringinterview.business.pojo.dto.interview.InterviewListDTO">
+        SELECT * FROM
+        ( select
+        pi.name,
+        pi.id,
+        GROUP_CONCAT(s.name) sampleName,
+        ru.id managerId,
+        ru.name managerName,
+        interview_time_len,
+        file_size,
+        plan_start_time,
+        pi.plan_end_time,
+        pi.address,
+        pi.plan_text,
+        pi.description,
+        begin_time,
+        doc_end_time,
+        audit_time,
+        pi.status
+        from rs_project_interview pi
+        left join rs_project_interview_sample pis on pis.interview_id = pi.id
+        left join rs_project_sample_${projectId} s on s.id = pis.sample_id
+        left join rs_sample_assignment_${projectId} sa on sa.sample_id = s.id
+        left join rs_project_team_user ptu on sa.team_user_id = ptu.id
+        left join rs_user ru on ptu.user_id = ru.id
+        where pi.project_id = #{projectId} AND type = 1
+        <if test="interviewId != null ">
+            and pi.id in
+            <foreach collection="interviewId" item="item" open="("  close=")" separator=",">
+                #{item}
+            </foreach>
+        </if>
+        <if test="sampleId != null and sampleId != ''">
+            and pis.sample_id  = #{sampleId}
+        </if>
+        <if test="sampleCondition != null and sampleCondition != ''">
+            AND (${sampleCondition})
+        </if>
+        <if test="checkRole != null and checkRole == 4">
+            AND (ptu.user_id IN (
+            SELECT
+            g.user_id
+            FROM rs_project_team_user_to_group g
+            LEFT JOIN rs_project_team_user_to_group g1 ON g1.group_id = g.group_id
+            WHERE g1.project_id = #{projectId} AND g1.user_id = #{userId}) OR ptu.user_id = #{userId})
+        </if>
+        <if test="checkRole != null and checkRole == 5 ">
+            and ptu.user_id = #{userId}
+        </if>
+        <if test="keyword !=null and keyword !=''">
+            and (s.`name` LIKE CONCAT('%',#{keyword},'%') or
+            s.`code` LIKE CONCAT('%',#{keyword},'%'))
+        </if>
+        GROUP BY pi.id
+        ) c LEFT JOIN
+        (SELECT * FROM
+        ( SELECT
+        pi.id interviewId,
+        GROUP_CONCAT(DISTINCT ru.name) assistantName,
+        GROUP_CONCAT(ptu.user_id) user_id
+        from rs_project_interview pi
+        left join rs_project_interview_sample pis on pis.interview_id = pi.id
+        left join rs_project_sample_${projectId} s on s.id = pis.sample_id
+        left join rs_sample_assignment_${projectId} sa on sa.sample_id = s.id
+        left join rs_project_team_user ptu on sa.team_user_id = ptu.id
+        left join rs_user ru on ptu.user_id = ru.id
+        where pi.project_id = #{projectId} and type = 2
+        <if test="interviewId != null ">
+            and pi.id in
+            <foreach collection="interviewId" item="item" open="("  close=")" separator=",">
+                #{item}
+            </foreach>
+        </if>
+        <if test="sampleId != null and sampleId != ''">
+            and pis.sample_id  = #{sampleId}
+        </if>
+        <if test="checkRole != null and checkRole == 4">
+            AND (ptu.user_id IN (
+            SELECT
+            g.user_id
+            FROM rs_project_team_user_to_group g
+            LEFT JOIN rs_project_team_user_to_group g1 ON g1.group_id = g.group_id
+            WHERE g1.project_id = #{projectId} AND g1.user_id = #{userId}) OR ptu.user_id = #{userId})
+        </if>
+        <if test="keyword !=null and keyword !=''">
+            and (s.`name` LIKE CONCAT('%',#{keyword},'%') or
+            s.`code` LIKE CONCAT('%',#{keyword},'%'))
+        </if>
+        group by pi.id) a
+        <if test="checkRole != null and checkRole == 3 ">
+            WHERE
+            find_in_set(${userId},user_id)
+        </if>) b on c.id = b.interviewId
+    </select>
+
+    <!--归属样本-->
+    <select id="getSampleOwner" resultType="com.monetware.ringinterview.business.pojo.dto.interview.SampleOwnerDTO">
+        select
+        ps.id,
+        ps.name,
+        code
+        from rs_project_interview rpi
+        left join rs_project_interview_sample rpis on rpi.id = rpis.interview_id
+        left join rs_project_sample_${projectId} ps on rpis.sample_id = ps.id
+        where rpi.id = #{interviewId}
+    </select>
+
+    <!--计划详情-->
+    <select id="getInterviewDetail" resultMap="detailMap">
+        select
+        pi.id,
+        ps.id sampleId,
+        pi.name interviewName,
+        ru.id managerId,
+        ru.name managerName,
+        pi.status,
+        pi.plan_text,
+        pi.description,
+        pi.address,
+        pi.plan_duration,
+        pi.create_time,
+        pi.plan_start_time,
+        pi.plan_end_time,
+        pi.begin_time,
+        pi.end_time,
+        pi.doc_begin_time,
+        pi.doc_end_time,
+        pi.audit_time,
+		pi.audit_end_time,
+        pi.create_time,
+        pi.audit_note,
+        ${projectId} as projectId,
+        ${interviewId} as interviewId
+        from rs_project_interview pi
+        left join rs_project_interview_sample pis on pis.interview_id = pi.id
+        left join rs_project_sample_${projectId} ps on ps.id = pis.sample_id
+        left join rs_sample_assignment_${projectId} sa on sa.sample_id = ps.id
+        left join rs_project_team_user ptu on ptu.id = sa.team_user_id
+        left join rs_user ru on ptu.user_id = ru.id
+		WHERE type = 1 and pi.id = #{interviewId}
+    </select>
+
+    <!--删除/批量删除访谈-->
+    <delete id="deleteInterview">
+        delete
+        from rs_project_interview
+        where id in
+        <foreach collection="interviewIds" item="item" index="index" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </delete>
+
+    <select id="updateInterviewAdd" parameterType="com.monetware.ringinterview.business.pojo.po.BaseProjectInterview" resultType="integer">
+        update rs_project_interview
+        <trim prefix="set" suffixOverrides=",">
+            <if test="fileSize != null">
+                file_size = file_size + #{fileSize},
+            </if>
+            <if test="interviewTimeLen != null">
+                interview_time_len = interview_time_len + #{interviewTimeLen},
+            </if>
+        </trim>
+        where id = #{id}
+    </select>
+
+    <update id="updateinterviewDel" parameterType="com.monetware.ringinterview.business.pojo.po.BaseProjectInterview">
+        update rs_project_interview
+        <trim prefix="set" suffixOverrides=",">
+            <if test="fileSize != null">
+                file_size = file_size - #{fileSize},
+            </if>
+            <if test="interviewTimeLen != null">
+                interview_time_len = interview_time_len - #{interviewTimeLen},
+            </if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <!-- 获取访谈进度 -->
+    <select id="selectInterviewDayCount" parameterType="com.monetware.ringinterview.business.pojo.vo.monitor.ProgressMonitoringVO"
+            resultType="Map">
+        SELECT DATE_FORMAT(create_time,'%Y-%m-%d') yearDay, COUNT(1) totalCount
+        FROM rs_project_interview
+		WHERE project_id = #{projectId}
+		AND DATE_FORMAT(create_time,'%Y-%m-%d') &gt;= #{startTime}
+		AND DATE_FORMAT(create_time,'%Y-%m-%d') &lt;= #{endTime}
+        <if test="checkRole != null and checkRole &gt; 2">
+            AND (user_id IN (
+            SELECT
+            g.user_id
+            FROM rs_project_team_user_to_group g
+            LEFT JOIN rs_project_team_user_to_group g1 ON g1.group_id = g.group_id
+            WHERE g1.project_id = #{projectId} AND g1.user_id = #{userId}) OR user_id = #{userId})
+        </if>
+        GROUP BY DATE_FORMAT(create_time,'%Y-%m-%d')
+    </select>
+
+    <!-- 获取访谈指标体系数据 -->
+    <select id="getInterviewStatData" resultType="Map">
+        SELECT
+        COUNT(1) totalCount,
+        SUM(CASE WHEN `status` = 5 THEN 1 ELSE 0 END) auditCount,
+        SUM(CASE WHEN `status` = 5 AND valid = 1  THEN 1 ELSE 0 END) auditSuccessCount
+        FROM rs_project_interview
+        WHERE project_id = #{projectId}
+    </select>
+
+</mapper>

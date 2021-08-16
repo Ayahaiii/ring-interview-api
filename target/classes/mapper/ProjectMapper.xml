@@ -1,0 +1,314 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.monetware.ringinterview.business.dao.ProjectDao">
+
+    <!-- 获取头部信息 -->
+    <select id="getProjectNameAndRole" resultType="com.monetware.ringinterview.business.pojo.dto.project.ProjectHeadDTO">
+        select
+        rp.id,
+        rp.name,
+		ur.role_id roleId,
+		rp.config,
+		rp.invite_code inviteCode,
+		rp.code_auto_audit autoAudit,
+		rp.code_expire_time expireTime,
+		rp.create_user createUser,
+		rp.status
+        from rs_project rp
+		LEFT JOIN rs_project_team_user_role ur ON ur.project_id = rp.id
+		WHERE rp.id = #{projectId} AND ur.user_id = #{userId}
+		ORDER BY ur.role_id
+		LIMIT 1
+    </select>
+
+    <!-- 获取项目详情 -->
+    <select id="getProjectInfo" resultType="com.monetware.ringinterview.business.pojo.dto.project.ProjectInfoDTO">
+        SELECT
+        rp.id,
+        rp.`name`,
+        rp.description,
+        rp.type_id typeId,
+		GROUP_CONCAT(rr.name) role,
+        rp.label_text labelText,
+        rp.create_time createTime,
+        rp.create_user createUser,
+        rp.begin_date beginDate,
+        rp.pause_time pauseTime,
+        rp.end_date endDate,
+        rp.status
+        FROM rs_project rp
+		LEFT JOIN rs_project_team_user_role ur ON ur.project_id = rp.id
+		LEFT JOIN rs_role rr ON ur.role_id = rr.id
+        WHERE rp.id = #{projectId} and ur.user_id = #{userId}
+		GROUP BY rp.id
+    </select>
+
+    <!-- 获取项目列表 -->
+    <select id="getProjectList" parameterType="com.monetware.ringinterview.business.pojo.vo.project.ProjectListVO"
+            resultType="com.monetware.ringinterview.business.pojo.dto.project.ProjectListDTO">
+        SELECT
+        rp.id,
+        rp.`name`,
+        rp.type_id typeId,
+        rp.label_text labelText,
+        GROUP_CONCAT(rpp.code) role,
+        (SELECT GROUP_CONCAT(rr.name) FROM rs_role rr
+        LEFT JOIN rs_project_team_user_role ur ON ur.role_id = rr.id
+        WHERE ur.project_id = rp.id AND ur.user_id = #{userId}
+        GROUP BY ur.project_id
+        ) roleName,
+        ru.`name` userName,
+        rp.create_time createTime,
+        rp.update_time updateTime,
+        rp.`status`,
+        rp.create_user createUser
+        FROM rs_project rp
+        LEFT JOIN rs_project_team_user rptu ON rp.id = rptu.project_id
+        LEFT JOIN rs_project_team_user_role rptur ON rptur.project_id = rptu.project_id AND rptur.user_id = rptu.user_id
+        LEFT JOIN rs_role_permission rrp ON rrp.role_id = rptur.role_id
+        LEFT JOIN rs_project_permission rpp ON rpp.id = rrp.permission_id AND rpp.if_root = 1
+        LEFT JOIN rs_user ru ON rp.create_user = ru.id
+        WHERE 1 = 1 AND rp.is_delete = 0 AND (rp.create_user = #{userId} OR (rptu.user_id = #{userId} and rptu.status = 2))
+        <if test="searchType == 'base'">
+            <if test="userType == 1">
+                AND rp.create_user = #{userId}
+            </if>
+            <if test="userType == 2">
+                AND rp.create_user != #{userId}
+            </if>
+            <if test="typeId != null">
+                AND rp.type_id = #{typeId}
+            </if>
+            <if test="status != null">
+                AND rp.`status` = #{status}
+            </if>
+            <if test="keyword != null and keyword != ''">
+                AND (rp.id = #{keyword} OR rp.`name` = #{keyword} OR rp.label_text = #{keyword} OR ru.`name` = #{keyword})
+            </if>
+        </if>
+        <if test="searchType == 'advanced'">
+            <if test="name != null and name != ''">
+                AND rp.`name` like CONCAT("%", #{name}, "%")
+            </if>
+            <if test="labelText != null and labelText != ''">
+                AND rp.label_text like CONCAT("%", #{labelText}, "%")
+            </if>
+            <if test="typeId != null">
+                AND rp.type_id = #{typeId}
+            </if>
+            <if test="status != null">
+                AND rp.`status` = #{status}
+            </if>
+            <if test="userName != null and userName != ''">
+                AND ru.`name` = #{userName}
+            </if>
+            <if test="startCreateTime != null">
+                AND rp.create_time &gt;= #{startCreateTime}
+            </if>
+            <if test="endCreateTime != null">
+                AND rp.create_time &lt;= #{endCreateTime}
+            </if>
+            <if test="startRunTime != null">
+                AND rp.begin_date &gt;= #{startRunTime}
+            </if>
+            <if test="endRunTime != null">
+                AND rp.begin_date &lt;= #{endRunTime}
+            </if>
+            <if test="startStopTime != null">
+                AND rp.end_date &gt;= #{startStopTime}
+            </if>
+            <if test="endStopTime != null">
+                AND rp.end_date &lt;= #{endStopTime}
+            </if>
+        </if>
+        GROUP BY rp.id
+        ORDER BY rp.create_time DESC
+    </select>
+
+    <!-- 获取项目列表 -->
+    <select id="getProjectListApp" parameterType="com.monetware.ringinterview.business.pojo.vo.project.ProjectListAppVO"
+            resultType="com.monetware.ringinterview.business.pojo.dto.project.ProjectListDTO">
+        SELECT
+        rp.id,
+        rp.`name`,
+        rp.type_id typeId,
+        rp.label_text labelText,
+        GROUP_CONCAT(rpp.code) role,
+        (SELECT GROUP_CONCAT(rr.name) FROM rs_role rr
+        LEFT JOIN rs_project_team_user_role ur ON ur.role_id = rr.id
+        WHERE ur.project_id = rp.id AND ur.user_id = #{userId}
+        GROUP BY ur.project_id
+        ) roleName,
+        ru.`name` userName,
+        rp.create_time createTime,
+        rp.update_time updateTime,
+        rp.`status`,
+        rp.create_user createUser
+        FROM rs_project rp
+        LEFT JOIN rs_project_team_user rptu ON rp.id = rptu.project_id
+        LEFT JOIN rs_project_team_user_role rptur ON rptur.project_id = rptu.project_id AND rptur.user_id = rptu.user_id
+        LEFT JOIN rs_role_permission rrp ON rrp.role_id = rptur.role_id
+        LEFT JOIN rs_project_permission rpp ON rpp.id = rrp.permission_id AND rpp.if_root = 1
+        LEFT JOIN rs_user ru ON rp.create_user = ru.id
+        WHERE 1 = 1 AND rp.is_delete = 0 AND (rp.create_user = #{userId} OR (rptu.user_id = #{userId} and rptu.status = 2))
+        <if test="searchType == 'base'">
+            <if test="userType == 1">
+                AND rp.create_user = #{userId}
+            </if>
+            <if test="userType == 2">
+                AND rp.create_user != #{userId}
+            </if>
+            <if test="typeId != null">
+                AND rp.type_id = #{typeId}
+            </if>
+            <if test="status != null">
+                AND rp.`status` = #{status}
+            </if>
+            <if test="keyword != null and keyword != ''">
+                AND (rp.id = #{keyword} OR rp.`name` = #{keyword} OR rp.label_text = #{keyword} OR ru.`name` = #{keyword})
+            </if>
+        </if>
+        <if test="searchType == 'advanced'">
+            <if test="name != null and name != ''">
+                AND rp.`name` like CONCAT("%", #{name}, "%")
+            </if>
+            <if test="labelText != null and labelText != ''">
+                AND rp.label_text like CONCAT("%", #{labelText}, "%")
+            </if>
+            <if test="typeId != null">
+                AND rp.type_id = #{typeId}
+            </if>
+            <if test="status != null">
+                AND rp.`status` = #{status}
+            </if>
+            <if test="userName != null and userName != ''">
+                AND ru.`name` = #{userName}
+            </if>
+            <if test="startCreateTime != null">
+                AND rp.create_time &gt;= #{startCreateTime}
+            </if>
+            <if test="endCreateTime != null">
+                AND rp.create_time &lt;= #{endCreateTime}
+            </if>
+            <if test="startRunTime != null">
+                AND rp.begin_date &gt;= #{startRunTime}
+            </if>
+            <if test="endRunTime != null">
+                AND rp.begin_date &lt;= #{endRunTime}
+            </if>
+            <if test="startStopTime != null">
+                AND rp.end_date &gt;= #{startStopTime}
+            </if>
+            <if test="endStopTime != null">
+                AND rp.end_date &lt;= #{endStopTime}
+            </if>
+        </if>
+        GROUP BY rp.id
+        ORDER BY rp.create_time DESC
+    </select>
+
+    <!-- 获取统计数据 -->
+    <select id="getProjectMonitor" resultType="com.monetware.ringinterview.business.pojo.dto.monitor.ProjectMonitoringReportDTO">
+        SELECT
+        (SELECT
+        COUNT(1)
+        FROM rs_project_team_user_to_group g
+        LEFT JOIN rs_project_team_user_to_group g1 ON g1.group_id = g.group_id
+        WHERE g1.project_id = #{projectId} AND g1.user_id = #{userId}) numOfTeam,
+        (SELECT
+        COUNT(1)
+        FROM rs_project_sample_${projectId} s
+        LEFT JOIN rs_sample_assignment_${projectId} a ON s.id = a.sample_id
+        LEFT JOIN rs_project_team_user tu ON a.team_user_id = tu.id AND tu.project_id = #{projectId}
+        WHERE tu.user_id = #{userId}) numOfSample,
+        COUNT(1) numOfInterview,
+        SUM(pi.interview_time_len) interviewTimeLen,
+        SUM(pi.file_size) fileSize
+        FROM rs_project_interview pi
+        WHERE pi.project_id = #{projectId} AND pi.user_id = #{userId}
+    </select>
+
+    <!-- 获取样本数量 -->
+    <select id="getProjectMonitoringSample" resultType="com.monetware.ringinterview.business.pojo.dto.monitor.ProjectMonitoringSampleDTO">
+        SELECT
+        (SELECT
+        COUNT(1)
+        FROM rs_project_sample_#{projectId} s
+        LEFT JOIN rs_sample_assignment_#{projectId} a ON s.id = a.sample_id
+        LEFT JOIN rs_project_team_user tu ON a.team_user_id = tu.id
+        WHERE tu.project_id = #{projectId} AND s.`status`=1
+        <if test="userId != null and userId!=''">
+            AND tu.user_id = #{userId}
+        </if>
+        ) numOfAssignSample,
+        (SELECT
+        COUNT(1)
+        FROM rs_project_sample_#{projectId} s
+        LEFT JOIN rs_sample_assignment_#{projectId} a ON s.id = a.sample_id
+        LEFT JOIN rs_project_team_user tu ON a.team_user_id = tu.id
+        WHERE tu.project_id = #{projectId} AND s.`status`=2
+        <if test="userId != null and userId!=''">
+            AND tu.user_id = #{userId}
+        </if>
+        ) numOfRunningSample,
+        (SELECT
+        COUNT(1)
+        FROM rs_project_sample_#{projectId} s
+        LEFT JOIN rs_sample_assignment_#{projectId} a ON s.id = a.sample_id
+        LEFT JOIN rs_project_team_user tu ON a.team_user_id = tu.id
+        WHERE tu.project_id = #{projectId} AND s.`status`=3
+        <if test="userId != null and userId!=''">
+            AND tu.user_id = #{userId}
+        </if>
+        ) numOfFinishSample
+        FROM rs_project_interview pi
+        WHERE pi.project_id = #{projectId} AND pi.user_id=#{userId}
+
+    </select>
+
+    <!-- 增加数量 -->
+    <update id="updateProjectAdd" parameterType="com.monetware.ringinterview.business.pojo.po.BaseProject">
+        update rs_project set
+        <if test="numOfTeam != null">
+            num_of_team = num_of_team + #{numOfTeam},
+        </if>
+        <if test="numOfSample != null">
+            num_of_sample = num_of_sample + #{numOfSample},
+        </if>
+        <if test="fileSize != null">
+            file_size = file_size + #{fileSize},
+        </if>
+        <if test="numOfInterview != null">
+            num_of_interview = num_of_interview + #{numOfInterview},
+        </if>
+        <if test="interviewTimeLen != null">
+            interview_time_len = interview_time_len + #{interviewTimeLen},
+        </if>
+        update_time = #{updateTime},
+        update_user = #{updateUser}
+        where id = #{id}
+    </update>
+
+    <!-- 增加数量 -->
+    <update id="updateProjectDel" parameterType="com.monetware.ringinterview.business.pojo.po.BaseProject">
+        update rs_project set
+        <if test="numOfTeam != null">
+            num_of_team = num_of_team - #{numOfTeam},
+        </if>
+        <if test="numOfSample != null">
+            num_of_sample = num_of_sample - #{numOfSample},
+        </if>
+        <if test="fileSize != null">
+            file_size = file_size - #{fileSize},
+        </if>
+        <if test="numOfInterview != null">
+            num_of_interview = num_of_interview - #{numOfInterview},
+        </if>
+        <if test="interviewTimeLen != null">
+            interview_time_len = interview_time_len - #{interviewTimeLen},
+        </if>
+        update_time = #{updateTime},
+        update_user = #{updateUser}
+        where id = #{id}
+    </update>
+</mapper>

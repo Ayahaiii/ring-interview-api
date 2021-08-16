@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.monetware.ringinterview.business.dao.ProjectInterviewSpeakerDao">
+
+    <!--删除/批量删除讲话者-->
+    <delete id="deleteSpeaker" parameterType="com.monetware.ringinterview.business.pojo.vo.interview.SpeakerDeleteVO">
+        delete from rs_project_interview_speaker where id in
+        <foreach collection="speakerIds" item="item" index="index" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </delete>
+
+    <!--讲话者列表-->
+    <select id="getSpeakList" resultType="com.monetware.ringinterview.business.pojo.dto.interview.SpeakerListDTO">
+        select
+        rpis.id,
+        rpis.name,
+        rpis.pet_name,
+        rpis.type,
+        rpis.description,
+        ps.code
+        from rs_project_interview_speaker rpis
+		left join rs_project_interview_sample pis on rpis.interview_id = pis.interview_id
+		left join rs_project_sample_${projectId} ps on ps.id = rpis.sample_owner
+        where rpis.interview_id = #{interviewId}
+        group by rpis.id
+    </select>
+
+
+    <select id="checkSpeak" resultType="integer">
+        select
+        id
+        from rs_project_interview_speaker rpis
+        where 1 = 1
+        and rpis.interview_id = #{interviewId}
+        <if test="name != null and name != ''">
+            and (name = #{name} or pet_name = #{name})
+        </if>
+        limit 1
+    </select>
+
+</mapper>
